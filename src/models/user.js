@@ -51,6 +51,13 @@ const userSchema = new mongoose.Schema({
     ],
 });
 
+userSchema.virtual("tasks", {
+    ref: "Task",
+    localField: "_id",
+    foreignField: "owner",
+});
+
+// Updated toJSON method to delete password and tokens from response body
 userSchema.methods.toJSON = function () {
     const user = this;
     const userObject = user.toObject();
@@ -61,6 +68,7 @@ userSchema.methods.toJSON = function () {
     return userObject;
 };
 
+// Generate token for each login
 userSchema.methods.generateAuthToken = async function () {
     const user = this;
 
@@ -72,6 +80,7 @@ userSchema.methods.generateAuthToken = async function () {
     return token;
 };
 
+// Login user
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email });
 
@@ -88,6 +97,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
     return user;
 };
 
+// Hash the password before saving to database
 userSchema.pre("save", async function (next) {
     const user = this;
 
