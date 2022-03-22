@@ -22,38 +22,46 @@ router.post("/tasks", auth, async (req, res) => {
 });
 
 // Read all tasks route
-// GET /tasks?completed=${boolean}
+// GET /tasks?completed=${Boolean}
+// GET /tasks?limit=${Number}&skip=${Number}
 router.get("/tasks", auth, async (req, res) => {
-    try {
-        let tasks = {};
-        if (req.query.completed !== null) {
-            tasks = await Task.find({
-                completed: req.query.completed === "true",
-                owner: req.user._id,
-            });
-        } else {
-            tasks = await Task.find({ owner: req.user._id });
-        }
-
-        res.send(tasks);
-    } catch (e) {
-        res.status(500).send();
-    }
-    // const match = {};
-
-    // if (req.query.completed) {
-    //     match.completed = req.query.completed === "true";
-    // }
-
+    /* Regular method to filter */
     // try {
-    //     await req.user.populate({
-    //         path: "tasks",
-    //         match,
-    //     });
-    //     res.send(req.user.tasks);
+    //     let tasks = {};
+    //     if (req.query.completed !== null) {
+    //         tasks = await Task.find({
+    //             completed: req.query.completed === "true",
+    //             owner: req.user._id,
+    //         });
+    //     } else {
+    //         tasks = await Task.find({ owner: req.user._id });
+    //     }
+
+    //     res.send(tasks);
     // } catch (e) {
     //     res.status(500).send();
     // }
+
+    /* Populate method to fetch tasks */
+    const match = {};
+
+    if (req.query.completed) {
+        match.completed = req.query.completed === "true";
+    }
+
+    try {
+        await req.user.populate({
+            path: "tasks",
+            match,
+            options: {
+                limit: parseInt(req.query.limit),
+                skip: parseInt(req.query.skip),
+            },
+        });
+        res.send(req.user.tasks);
+    } catch (e) {
+        res.status(500).send();
+    }
 });
 
 // Read single specified task
