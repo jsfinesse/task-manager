@@ -5,6 +5,7 @@ const router = new express.Router();
 const auth = require("../middleware/auth");
 const User = require("../models/user");
 
+// Create user route
 router.post("/users", async (req, res) => {
     const user = new User(req.body);
 
@@ -17,6 +18,7 @@ router.post("/users", async (req, res) => {
     }
 });
 
+// Login user route
 router.post("/users/login", async (req, res) => {
     try {
         const user = await User.findByCredentials(
@@ -30,6 +32,7 @@ router.post("/users/login", async (req, res) => {
     }
 });
 
+// Logout user route
 router.post("/users/logout", auth, async (req, res) => {
     try {
         req.user.tokens = req.user.tokens.filter((token) => {
@@ -43,6 +46,7 @@ router.post("/users/logout", auth, async (req, res) => {
     }
 });
 
+// Logout user from all sessions route
 router.post("/users/logoutAll", auth, async (req, res) => {
     try {
         req.user.tokens = [];
@@ -53,10 +57,12 @@ router.post("/users/logoutAll", auth, async (req, res) => {
     }
 });
 
+// Get user route
 router.get("/users/me", auth, async (req, res) => {
     res.send(req.user);
 });
 
+// Update user route
 router.patch("/users/me", auth, async (req, res) => {
     const updates = Object.keys(req.body);
     const allowedUpdates = ["name", "email", "password", "age"];
@@ -79,6 +85,7 @@ router.patch("/users/me", auth, async (req, res) => {
     }
 });
 
+// Delete user route
 router.delete("/users/me", auth, async (req, res) => {
     try {
         await req.user.remove();
@@ -88,6 +95,7 @@ router.delete("/users/me", auth, async (req, res) => {
     }
 });
 
+// Image upload middleware
 const upload = multer({
     limits: {
         fileSize: 1000000,
@@ -100,6 +108,7 @@ const upload = multer({
     },
 });
 
+// Avatar upload/update route
 router.post(
     "/users/me/avatar",
     auth,
@@ -116,25 +125,27 @@ router.post(
     }
 );
 
+// Avatar delete route
 router.delete("/users/me/avatar", auth, async (req, res) => {
     req.user.avatar = undefined;
     await req.user.save();
     res.send();
 });
 
+// Get user avatar by id route
 router.get("/users/:id/avatar", async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
 
-        if(!user || !user.avatar) {
+        if (!user || !user.avatar) {
             throw new Error();
         }
 
-        res.set('Content-Type', 'image/jpg');
+        res.set("Content-Type", "image/jpg");
         res.send(user.avatar);
     } catch (e) {
         res.status(400).send();
     }
-})
+});
 
 module.exports = router;
