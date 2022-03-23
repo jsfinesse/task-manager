@@ -1,3 +1,4 @@
+const multer = require("multer");
 const express = require("express");
 const router = new express.Router();
 
@@ -86,5 +87,12 @@ router.delete("/users/me", auth, async (req, res) => {
         res.status(500).send();
     }
 });
+
+const upload = multer({
+    dest: "avatars"
+})
+router.post("/users/me/avatar", upload.single('avatar'), async (req, res) => {
+    res.send();
+})
 
 module.exports = router;
