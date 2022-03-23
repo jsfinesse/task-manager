@@ -67,13 +67,14 @@ userSchema.virtual("tasks", {
     foreignField: "owner",
 });
 
-// Updated toJSON method to delete password and tokens from response body
+// Updated toJSON method to delete password, tokens and avatar from response body
 userSchema.methods.toJSON = function () {
     const user = this;
     const userObject = user.toObject();
 
     delete userObject.password;
     delete userObject.tokens;
+    delete userObject.avatar;
 
     return userObject;
 };
